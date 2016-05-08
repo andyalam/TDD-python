@@ -38,7 +38,8 @@ class NewVisitorTest(unittest.TestCase):
         table = self.browser.find_element_by_id('id_list_table')
         rows = self.browser.find_elements_by_tag_name('tr')
         self.assertTrue(
-            any(row.text == '1: Download more RAM' for row in rows)
+            any(row.text == '1: Download more RAM' for row in rows),
+            "New to-do item did not appear in table"
         )
 
         # The user is invited to enter another to-do item via text box
