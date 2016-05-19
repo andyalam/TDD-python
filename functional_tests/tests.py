@@ -42,26 +42,48 @@ class NewVisitorTest(LiveServerTestCase):
         # When the user hits enter, the page updates, and now
         # the to-do item "Download more RAM" is added to the to-do list
         inputbox.send_keys(Keys.ENTER)
+        user1_list_url = self.browser.current_url
+        self.assertRegex(user1_list_url, '/lists/.+')
         self.check_for_row_in_list_table('1: Download more RAM')
 
         # There is still a text box inviting the user to add another item
-        #the users enters "Actually install physical RAM"
+        # the users enters "Actually install physical RAM".
+        # The page udpates again and shows the new to-do-item
+        # added to the list.
         inputbox = self.browser.find_element_by_id('id_new_item')
         inputbox.send_keys('Actually install physical RAM')
         inputbox.send_keys(Keys.ENTER)
         self.check_for_row_in_list_table('1: Download more RAM')
         self.check_for_row_in_list_table('2: Actually install physical RAM')
 
-        # The user is invited to enter another to-do item via text box
-        # The user enters "Download a car"
-        #self.fail('Finish the test!')
 
-        # The page udpates again and shows the new to-do-item
-        # added to the list
+        # ----------- Now a second user comes along to the site -----------
 
-        # The user notices that the URL has been changing, presumably to
-        # save his/her list in the URL.
 
-        # The user revisits that URL, the list is still there, 'saved'.
+        ## We use a new browser session to make sure that no information
+        ## of Use1 is coming through from cookies, etc
+        self.browser.quit()
+        self.browser = webdriver.Firefox()
 
-        # The user leaves the site.
+        # User2 visits the site. There is no sign of User1's list
+        self.browser.get(self.live_server_url)
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Download more RAM', page_text)
+        self.assertNotIn('Actually install physical RAM', page_text)
+
+        # User2 starts a new list by entering a new item.
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox.send_keys('Buy some milk')
+        inputbox.send_keys(Keys.ENTER)
+
+        # User2 gets a unique URL for their list
+        # Check that it follows our pattern and does not match user1's URL
+        user2_list_url = self.browser.current_url
+        self.assertRegex(user2_list_url, '/lists/.+')
+        self.assertNotEqual(user2_list_url, user1_list_url)
+
+        # Additional check to make sure user2's unique URL has its item and
+        # does not match user1's item(s)
+        page_text = self.browser.find_elements_by_tag_name('body').text
+        self.assertNotIn('Download more RAM', page_text)
+        self.assertIn('Buy some milk', page_text)
