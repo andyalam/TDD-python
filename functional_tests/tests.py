@@ -18,7 +18,7 @@ class NewVisitorTest(LiveServerTestCase):
         table = self.browser.find_element_by_id('id_list_table')
         rows = self.browser.find_elements_by_tag_name('tr')
         self.assertIn(row_text, [row.text for row in rows])
-        
+
 
     def test_can_start_a_list_and_retrieve_it_later(self):
 
@@ -85,6 +85,6 @@ class NewVisitorTest(LiveServerTestCase):
 
         # Additional check to make sure user2's unique URL has its item and
         # does not match user1's item(s)
-        page_text = self.browser.find_elements_by_tag_name('body').text
+        page_text = self.browser.find_element_by_tag_name('body').text
         self.assertNotIn('Download more RAM', page_text)
         self.assertIn('Buy some milk', page_text)
